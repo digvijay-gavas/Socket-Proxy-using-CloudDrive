@@ -19,7 +19,6 @@ public class CloudDriveOutputStream extends OutputStream {
 	
 	@Override
 	public void write(int b) throws IOException {
-		System.out.write(b);
 		if (buffer_pointer>buffer_size)
 			flush();
 		buffer[buffer_pointer]=(byte)b;
@@ -37,7 +36,7 @@ public class CloudDriveOutputStream extends OutputStream {
 	@Override
 	public void flush() throws IOException {
 		try {
-			cloudDrive.uploadFile(uid, buffer);
+			cloudDrive.uploadFile(uid, buffer,0,buffer_pointer);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

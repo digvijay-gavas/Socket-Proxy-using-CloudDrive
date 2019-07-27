@@ -117,9 +117,13 @@ public class GoogleCloudDrive implements CloudDrive{
                 .build();		
 	}
 
-
 	@Override
 	public void uploadFile(String uploadFileName, byte[] inputBytes) throws Exception {
+		uploadFile(uploadFileName, inputBytes,0,inputBytes.length);
+	}
+
+	@Override
+	public void uploadFile(String uploadFileName, byte[] inputBytes, int offset, int length) throws Exception {
 		boolean isFileExistInDrive=true;
 		while(isFileExistInDrive)
 		{
@@ -147,7 +151,7 @@ public class GoogleCloudDrive implements CloudDrive{
 		}
 		File fileMetadata = new File();
         fileMetadata.setName(uploadFileName);
-        InputStreamContent mediaContent = new InputStreamContent("text/plain", new BufferedInputStream( new ByteArrayInputStream(inputBytes)));  
+        InputStreamContent mediaContent = new InputStreamContent("text/plain", new BufferedInputStream( new ByteArrayInputStream(inputBytes,offset,length)));  
         File file = service.files().create(fileMetadata, mediaContent)
             .setFields("id")
             .execute();

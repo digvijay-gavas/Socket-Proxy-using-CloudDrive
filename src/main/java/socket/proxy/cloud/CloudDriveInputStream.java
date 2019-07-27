@@ -7,7 +7,7 @@ import socket.proxy.cloud.types.CloudDrive;
 
 public class CloudDriveInputStream extends InputStream {
 	
-	int buffer_size=32768;
+	int buffer_size=0;
 	byte[] buffer = new byte[buffer_size];
 	int buffer_pointer=buffer_size-1;
 	
@@ -24,6 +24,7 @@ public class CloudDriveInputStream extends InputStream {
 		if(buffer_pointer>=(buffer_size-1))
 			try {
 				buffer=cloudDrive.downloadFile(uid);
+				System.out.println(buffer);
 				buffer_size=buffer.length;
 				buffer_pointer=0;
 				available=buffer_size-buffer_pointer;
@@ -46,7 +47,7 @@ public class CloudDriveInputStream extends InputStream {
 			}
 		buffer_pointer++;
 		available--;
-		return buffer[buffer_pointer];
+		return buffer[buffer_pointer-1];
 	}
 	
 	@Override

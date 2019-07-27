@@ -10,18 +10,18 @@ import socket.proxy.cloud.types.GoogleCloudDrive;
 
 public class Test {
 	public static void main(String[] args) throws Exception {
-		/*ServerSocket serverSocket=new ServerSocket(8223);
+		ServerSocket serverSocket=new ServerSocket(8223);
 		Socket socket=serverSocket.accept();
 		
-		CloudDriveSocket cloudSocket=new CloudDriveSocket(new GoogleCloudDrive(),"socket",CloudDriveSocket.SERVER);
-		SocketBindThread.bind(socket,cloudSocket,true);*/
+		CloudDriveSocket cloudSocket=new CloudDriveSocket(new GoogleCloudDrive(),"TestSocketUID",CloudDriveSocket.SERVER);
+		SocketBindThread.bind(socket,cloudSocket,true);
 		
 		
 		
-		Socket socket=new Socket("localhost",5355);
+		/*Socket socket=new Socket("localhost",5355);
 		
 		CloudDriveSocket cloudSocket=new CloudDriveSocket(new GoogleCloudDrive(),"socket",CloudDriveSocket.CLIENT);
-		SocketBindThread.bind(socket,cloudSocket,true);
+		SocketBindThread.bind(socket,cloudSocket,true);*/
 		
 		//GoogleCloudDrive cloudDrive=new GoogleCloudDrive();
 		//cloudDrive.init("Drive");
