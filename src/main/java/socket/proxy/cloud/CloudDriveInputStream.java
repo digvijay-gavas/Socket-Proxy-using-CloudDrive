@@ -11,7 +11,7 @@ public class CloudDriveInputStream extends InputStream {
 	byte[] buffer = new byte[buffer_size];
 	int buffer_pointer=buffer_size-1;
 	
-	int available=10;
+	int available=0;
 	CloudDrive cloudDrive;
 	String uid;
 	

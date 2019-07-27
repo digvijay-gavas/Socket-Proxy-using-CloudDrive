@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import socket.proxy.cloud.types.CloudDrive;
 
 public class CloudDriveOutputStream extends OutputStream {
-	int buffer_size=32768;
+	int buffer_size=10;//32768;
 	byte[] buffer = new byte[buffer_size];
 	int buffer_pointer=0;
 	CloudDrive cloudDrive;
@@ -19,7 +19,7 @@ public class CloudDriveOutputStream extends OutputStream {
 	
 	@Override
 	public void write(int b) throws IOException {
-		if (buffer_pointer>buffer_size)
+		if (buffer_pointer>=buffer_size)
 			flush();
 		buffer[buffer_pointer]=(byte)b;
 		buffer_pointer++;
