@@ -2,7 +2,6 @@ package socket.proxy.cloud;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.FileAlreadyExistsException;
 
 import socket.proxy.cloud.types.CloudDrive;
 

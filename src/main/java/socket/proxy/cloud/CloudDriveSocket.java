@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import logging.ColorLogger;
 import socket.proxy.cloud.types.CloudDrive;
 
 public class CloudDriveSocket extends Socket {
@@ -17,13 +16,11 @@ public class CloudDriveSocket extends Socket {
 	static String CLIENT="CLIENT";
 	
 	public CloudDriveSocket(CloudDrive cloudDrive,String uid,String type) {
-		//ColorLogger.logln("<info>"+uid+"</info>");
 		this.cloudDrive=cloudDrive;
 		this.uid=uid;
 		try {
 			this.cloudDrive.init(uid);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if(type.equalsIgnoreCase(SERVER))
