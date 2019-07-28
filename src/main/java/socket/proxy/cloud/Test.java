@@ -19,7 +19,7 @@ public class Test {
 		
 		
 		
-		Socket socket=new Socket("localhost",18080); 
+		Socket socket=new Socket("localhost",5355); 
 		
 		CloudDriveSocket cloudSocket=new CloudDriveSocket(new GoogleCloudDrive(),"TestSocketUID",CloudDriveSocket.CLIENT);
 		

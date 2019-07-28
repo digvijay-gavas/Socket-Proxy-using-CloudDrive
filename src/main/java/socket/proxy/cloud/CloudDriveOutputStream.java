@@ -36,25 +36,21 @@ public class CloudDriveOutputStream extends OutputStream {
 	
 	@Override
 	public void flush() throws IOException {
-		boolean isFileExistInDrive=true;
-		while(isFileExistInDrive)
-			try {
-				cloudDrive.uploadFile(uid, buffer,0,buffer_pointer);
-				isFileExistInDrive=false;
-			} 
-			catch (FileAlreadyExistsException faee)
-			{
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+	
+		try {
+			while (true)
+				if(!cloudDrive.isFileExist(uid))
+				{
+						cloudDrive.uploadFile(uid, buffer,0,buffer_pointer);
+						break;
 				}
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				break;
-			}
+				else
+				{
+					Thread.sleep(1000);
+				}
+		} catch (Exception e) {
+			throw new IOException("Unable to send data");
+		}
 		buffer_pointer=0;
 		
 		//System.out.println("Flushed ");

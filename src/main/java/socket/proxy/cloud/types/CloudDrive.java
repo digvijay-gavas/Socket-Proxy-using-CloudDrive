@@ -18,4 +18,6 @@ public interface CloudDrive {
 	public byte[] downloadFile(String downloadFileName)  throws FileNotFoundException,Exception;
 	
 	public void deleteFile(String deleteFileName) throws Exception;
+	
+	public boolean isFileExist(String deleteFileName) throws Exception;
 }

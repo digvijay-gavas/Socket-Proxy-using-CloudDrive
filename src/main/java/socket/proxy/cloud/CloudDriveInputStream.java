@@ -21,45 +21,42 @@ public class CloudDriveInputStream extends InputStream {
 		this.uid=uid;
 	}
 	
-	private void load() {
-		boolean isFileExistInDrive=false;
+	private void load() throws Exception {
+		//boolean isFileExistInDrive=false;
 		if(buffer_pointer>=(buffer_size-1))
-			while(!isFileExistInDrive)
-				try {
-					buffer=cloudDrive.downloadFile(uid);
-					cloudDrive.deleteFile(uid);
-					isFileExistInDrive=true;
-					//System.out.println(buffer);
-					buffer_size=buffer.length;
-					buffer_pointer=0;
-					available=buffer_size-buffer_pointer;
-				} 
-				catch (FileNotFoundException fnfe)
+			while(true)
+				if(cloudDrive.isFileExist(uid))
 				{
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+						buffer=cloudDrive.downloadFile(uid);
+						cloudDrive.deleteFile(uid);
+						//isFileExistInDrive=true;
+						//System.out.println(buffer);
+						buffer_size=buffer.length;
+						buffer_pointer=0;
+						available=buffer_size-buffer_pointer;
+						break;
+				} 
+				else 
+				{
+					Thread.sleep(1000);
 				}
-				catch (Exception e) {
-					e.printStackTrace();
-					break;
-				}
+				
 	}
 	
 	@Override
 	public int read() throws IOException {
-		load();
+		try {
+			load();
+		} catch (Exception e1) {
+			throw new IOException("Unable to read data");
+		}
 		while(available<=0)
 			try {
-				Thread.sleep(1000);
 				load();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (Exception e1) {
+				throw new IOException("Unable to read data");
 			}
+			
 		buffer_pointer++;
 		available--;
 		return buffer[buffer_pointer-1];

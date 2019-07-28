@@ -85,9 +85,9 @@ public class GoogleCloudDrive implements CloudDrive{
 
 	@Override
 	public void uploadFile(String uploadFileName, byte[] inputBytes, int offset, int length) throws FileAlreadyExistsException,Exception {
-		for (File file : service.files().list().execute().getFiles())
+		/*for (File file : service.files().list().execute().getFiles())
 			if(file.getName().equalsIgnoreCase(uploadFileName))
-				throw new FileAlreadyExistsException("File aready exist in drive " + uploadFileName);
+				throw new FileAlreadyExistsException("File aready exist in drive " + uploadFileName);*/
 		File fileMetadata = new File();
         fileMetadata.setName(uploadFileName);
         InputStreamContent mediaContent = new InputStreamContent("text/plain", new BufferedInputStream( new ByteArrayInputStream(inputBytes,offset,length)));  
@@ -100,20 +100,16 @@ public class GoogleCloudDrive implements CloudDrive{
 
 
 	@Override
-	public byte[] downloadFile(String downloadFileName) throws FileNotFoundException,Exception {
-		List<File> files =service.files().list().execute().getFiles();
-		if (files == null || files.isEmpty()) {
-            throw new FileNotFoundException("File not found "+downloadFileName);
-        } else {
-            for (File file : files)
+	public byte[] downloadFile(String downloadFileName) throws FileNotFoundException,Exception {	
+         for (File file : service.files().list().execute().getFiles())
             	if(file.getName().equalsIgnoreCase(downloadFileName))
 	    		{
             		byte[] outputBytes= service.files().get(file.getId()).executeMediaAsInputStream().readAllBytes();
             		System.out.println("downloaded : "+downloadFileName+" " + file.getId());
             		return outputBytes;
 	    		}
-            throw new FileNotFoundException("File not found "+downloadFileName);
-        }
+         return new byte[]{};
+        
 	}
 
 	@Override
@@ -126,4 +122,13 @@ public class GoogleCloudDrive implements CloudDrive{
 				break;
 			}
 	}
+
+	@Override
+	public boolean isFileExist(String fileName) throws Exception {
+		for (File file : service.files().list().execute().getFiles())
+			if(file.getName().equalsIgnoreCase(fileName))
+				return true;
+		return false;
+	}
+	
 }
