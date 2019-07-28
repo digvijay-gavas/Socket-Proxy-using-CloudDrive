@@ -1,5 +1,6 @@
 package socket.proxy.cloud;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -21,17 +22,31 @@ public class CloudDriveInputStream extends InputStream {
 	}
 	
 	private void load() {
+		boolean isFileExistInDrive=false;
 		if(buffer_pointer>=(buffer_size-1))
-			try {
-				buffer=cloudDrive.downloadFile(uid);
-				System.out.println(buffer);
-				buffer_size=buffer.length;
-				buffer_pointer=0;
-				available=buffer_size-buffer_pointer;
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			while(!isFileExistInDrive)
+				try {
+					buffer=cloudDrive.downloadFile(uid);
+					cloudDrive.deleteFile(uid);
+					isFileExistInDrive=true;
+					//System.out.println(buffer);
+					buffer_size=buffer.length;
+					buffer_pointer=0;
+					available=buffer_size-buffer_pointer;
+				} 
+				catch (FileNotFoundException fnfe)
+				{
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+					break;
+				}
 	}
 	
 	@Override

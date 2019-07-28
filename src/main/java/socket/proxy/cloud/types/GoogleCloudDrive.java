@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
@@ -66,46 +67,6 @@ public class GoogleCloudDrive implements CloudDrive{
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
-
-    public static void main(String... args) throws IOException, GeneralSecurityException {
-        // Build a new authorized API client service.
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
-                .setApplicationName(APPLICATION_NAME)
-                .build();
-
-        
-        
-        // upload temp file
-        File fileMetadata = new File();
-        fileMetadata.setName("photo.jpg");
-        java.io.File filePath = new java.io.File("C:\\Users\\49151\\Pictures\\Camera Roll\\WIN_20190622_13_15_22_Pro.jpg");
-        
-
-        FileContent mediaContent = new FileContent("image/jpeg", filePath);
-        File file = service.files().create(fileMetadata, mediaContent)
-            .setFields("id")
-            .execute();
-        System.out.println("File ID: " + file.getId());
-        
-        
-        
-        // Print the names and IDs for up to 10 files.
-        FileList result = service.files().list()
-                .setPageSize(10)
-                .setFields("nextPageToken, files(id, name)")
-                .execute();
-        List<File> files = result.getFiles();
-        if (files == null || files.isEmpty()) {
-            System.out.println("No files found.");
-        } else {
-            System.out.println("Files:");
-            for (File file1 : files) {
-                System.out.printf("%s (%s)\n", file1.getName(), file1.getId());
-            }
-        }
-    }
-
     
     Drive service;
 
@@ -118,114 +79,51 @@ public class GoogleCloudDrive implements CloudDrive{
 	}
 
 	@Override
-	public void uploadFile(String uploadFileName, byte[] inputBytes) throws Exception {
+	public void uploadFile(String uploadFileName, byte[] inputBytes) throws FileAlreadyExistsException,Exception {
 		uploadFile(uploadFileName, inputBytes,0,inputBytes.length);
 	}
 
 	@Override
-	public void uploadFile(String uploadFileName, byte[] inputBytes, int offset, int length) throws Exception {
-		boolean isFileExistInDrive=true;
-		while(isFileExistInDrive)
-		{
-			isFileExistInDrive=false;
-			List<File> files =service.files().list().execute().getFiles();
-			
-			if (files == null || files.isEmpty()) {
-	            System.out.println(uploadFileName+" not exist already");
-	        } else {
-	            for (File file1 : files)
-	            {
-	            	//System.out.println("---"+file1.getName()+ " "+file1.getId());
-	            	if(file1.getName().equalsIgnoreCase(uploadFileName))
-		    		{
-	            		System.out.println(uploadFileName+" exist already");
-	            		System.out.println(uploadFileName+" waiting");
-	            		isFileExistInDrive=true;
-	            		Thread.sleep(2000);
-		    		}
-	            	
-	            }
-	            files.clear();
-	            
-	        }
-		}
+	public void uploadFile(String uploadFileName, byte[] inputBytes, int offset, int length) throws FileAlreadyExistsException,Exception {
+		for (File file : service.files().list().execute().getFiles())
+			if(file.getName().equalsIgnoreCase(uploadFileName))
+				throw new FileAlreadyExistsException("File aready exist in drive " + uploadFileName);
 		File fileMetadata = new File();
         fileMetadata.setName(uploadFileName);
         InputStreamContent mediaContent = new InputStreamContent("text/plain", new BufferedInputStream( new ByteArrayInputStream(inputBytes,offset,length)));  
         File file = service.files().create(fileMetadata, mediaContent)
             .setFields("id")
             .execute();
-        
-        System.out.println("File:"+file.getName()+" " + file.getId());
+        System.out.println("uploaded   : "+uploadFileName+" " + file.getId());
 		
 	}
 
 
 	@Override
-	public byte[] downloadFile(String downloadFileName) throws Exception {
-		boolean isFileExistInDrive=false;
-		OutputStream outputStream = new ByteArrayOutputStream();
-		while(!isFileExistInDrive)
-		{
-			isFileExistInDrive=false;
-			List<File> files =service.files().list().execute().getFiles();
-			
-			if (files == null || files.isEmpty()) {
-	            System.out.println(downloadFileName+" not exist");
-	            System.out.println(downloadFileName+" waiting");
-	            Thread.sleep(2000);
-	        } else {
-	            for (File file1 : files)
-	            {
-	            	if(file1.getName().equalsIgnoreCase(downloadFileName))
-		    		{
-	            		System.out.println(downloadFileName+" exist");
-	            		byte[] outputBytes= service.files().get(file1.getId()).executeMediaAsInputStream().readAllBytes();
-	            		service.files().delete(file1.getId()).execute();
-	            		return outputBytes;
-	            		
-		    		}
-	            	
-	            }
-	            files.clear();
-	            
-	        }
-		}
-		return null;
+	public byte[] downloadFile(String downloadFileName) throws FileNotFoundException,Exception {
+		List<File> files =service.files().list().execute().getFiles();
+		if (files == null || files.isEmpty()) {
+            throw new FileNotFoundException("File not found "+downloadFileName);
+        } else {
+            for (File file : files)
+            	if(file.getName().equalsIgnoreCase(downloadFileName))
+	    		{
+            		byte[] outputBytes= service.files().get(file.getId()).executeMediaAsInputStream().readAllBytes();
+            		System.out.println("downloaded : "+downloadFileName+" " + file.getId());
+            		return outputBytes;
+	    		}
+            throw new FileNotFoundException("File not found "+downloadFileName);
+        }
 	}
-	/*
-	public  File insertFile(String title, String parentId, String mimeType, String filename, InputStream stream) {
 
-	    try {
-	             
-
-	            // File's metadata.
-	            File body = new File();
-	            body.setName(title);
-	            body.setMimeType(mimeType);
-
-	            // Set the parent folder.
-	            if (parentId != null && parentId.length() > 0) {
-	              body.setParents(
-	                  Arrays.asList(new ParentReference().setId(parentId)));
-	            }
-
-	            // File's content.
-	            InputStreamContent mediaContent = new InputStreamContent(mimeType, new BufferedInputStream(stream));  
-	            try {
-	              File file = service.files().create(body, mediaContent).execute();
-
-	              return file;
-	            } catch (IOException e) {
-	              logger.log(Level.WARNING, "un error en drive service: "+ e);
-	              return null;
-	            }
-
-	    } catch (IOException e1) {
-	           // TODO Auto-generated catch block
-	           e1.printStackTrace();
-	           return null;
-	    }
-
-	  }*/
+	@Override
+	public void deleteFile(String deleteFileName) throws Exception {
+		for (File file : service.files().list().execute().getFiles())
+			if(file.getName().equalsIgnoreCase(deleteFileName))
+			{
+				service.files().delete(file.getId()).execute();
+				System.out.println("deleted    : "+deleteFileName+" " + file.getId());
+				break;
+			}
+	}
 }

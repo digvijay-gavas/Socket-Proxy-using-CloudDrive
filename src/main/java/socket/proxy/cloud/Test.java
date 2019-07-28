@@ -19,11 +19,11 @@ public class Test {
 		
 		
 		
-		Socket socket=new Socket("localhost",5355);
+		Socket socket=new Socket("localhost",18080); 
 		
 		CloudDriveSocket cloudSocket=new CloudDriveSocket(new GoogleCloudDrive(),"TestSocketUID",CloudDriveSocket.CLIENT);
 		
-		new Thread(new Runnable() {
+		/*new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -52,8 +52,8 @@ public class Test {
 				
 			}
 		}).start();
-		
-		//SocketBindThread.bind(socket,cloudSocket,true);
+		*/
+		SocketBindThread.bind(socket,cloudSocket,true);
 		
 		//GoogleCloudDrive cloudDrive=new GoogleCloudDrive();
 		//cloudDrive.init("Drive");
